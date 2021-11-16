@@ -7,8 +7,10 @@
 #include <vector>
 #include <string>
 #include <sstream>
+#include <chrono>
 
 using namespace std;
+using namespace std::chrono;
 
 int main(int argc, char **argv);
 vector<float> dijkstraAlgorithm(vector<vector<float>> &distanceMatrix,
@@ -191,6 +193,7 @@ vector<float> dijkstraAlgorithm(vector<vector<float>> &distanceMatrix,
   }
 
   double start = omp_get_wtime();
+  // auto start = high_resolution_clock::now();
 
 #pragma omp parallel private(threadFirst, threadID, threadLast, threadMinDistance, threadNearestNode, threadIterationCount) \
     shared(connected, minDistance, minimumDistances, nearestNode, numOfThreads, distanceMatrix)
@@ -278,8 +281,13 @@ vector<float> dijkstraAlgorithm(vector<vector<float>> &distanceMatrix,
   }
   double end = omp_get_wtime();
   double timeTaken = end - start;
-  cout << "Total time taken for parallel Dijkstra computation = " << timeTaken;
-  cout << "\n";
+  cout << "Total time taken for parallel Dijkstra computation = "
+       << timeTaken * 1000 << "microseconds \n";
+  // auto stop = high_resolution_clock::now();
+
+  // auto timeTaken = duration_cast<microseconds>(stop - start).count();
+  // cout << "Total time taken for serial Dijkstra computation = " << timeTaken;
+  // cout << " microseconds\n";
   return minimumDistances;
 }
 
