@@ -39,12 +39,14 @@ int main(int argc, char **argv)
   int infinite = 2147483647;
   int j;
 
+  cout << "----- Welcome to Travel Partner -----\n";
+
   vector<string> cities;
   vector<vector<float>> distanceMatrix = initializeData(cities);
 
   int nodeCount = distanceMatrix.size();
 
-  cout << "Available cities: \n";
+  cout << "List of Available cities under this plan: \n";
   for (int i = 0; i < nodeCount; ++i)
   {
     cout << "\t" << i + 1 << ". " << cities[i] << "\n";
@@ -55,7 +57,7 @@ int main(int argc, char **argv)
   int cityIdx;
   cin >> cityIdx;
   --cityIdx;
-  cout << "You have chosen: " << cities[cityIdx] << " to start with.\n";
+  cout << "You have chosen '" << cities[cityIdx] << "' to start with.\n";
 
   string temp = cities[cityIdx];
   cities[cityIdx] = cities[0];
@@ -75,7 +77,7 @@ int main(int argc, char **argv)
   }
 
   cout << "\n";
-  cout << "\t---------- Distance matrix ----------\n";
+  cout << "---------- Distance matrix ----------\n";
   cout << "\n";
   cout << "  " << setw(3) << "  " << setw(15) << "Maharashtra";
   for (i = 0; i < nodeCount; i++)
@@ -100,7 +102,7 @@ int main(int argc, char **argv)
     cout << "\n";
   }
 
-  cout << "\nWhich cities would you like to visit?\n";
+  cout << "\nWhich cities would you like to consider in your travel plan?\n";
   cout << "Enter the corresponding row numbers separated by comma from the "
        << "above matrix: ";
   vector<int> toVisit;
@@ -130,13 +132,17 @@ int main(int argc, char **argv)
   vector<float> minimumDistances = dijkstraAlgorithm(distanceMatrix, parent);
 
   cout << "\n";
-  cout << "  Minimum distances from " << cities[0] << " To :\n";
+  cout << "----- The Best Travel Plans for your desired cities is given below"
+       << " -----\n";
+  cout << "Here are the shortest paths to travel to your desired destinations "
+       << "spending less time travelling and more time enjoying your stay!\n";
+  // cout << "The Minimum distances from " << cities[0] << " To -\n";
 
   for (i = 0; i < toVisit.size(); i++)
   {
-    cout << "\t" << i + 1 << ". " << cities[toVisit[i]]
-         << " = " << minimumDistances[toVisit[i]] << "\n";
-    cout << "\tPath: " << cities[0] << " -> ";
+    cout << "\t" << i + 1 << ". " << cities[0] << " -> " << cities[toVisit[i]]
+         << " = " << minimumDistances[toVisit[i]] << " KM\n";
+    cout << "\tTourist places on your way: " << cities[0] << " -> ";
     printPath(parent, toVisit[i], cities);
     cout << "END\n";
   }
@@ -183,6 +189,8 @@ vector<float> dijkstraAlgorithm(vector<vector<float>> &distanceMatrix,
   {
     minimumDistances[i] = distanceMatrix[0][i];
   }
+
+  double start = omp_get_wtime();
 
 #pragma omp parallel private(threadFirst, threadID, threadLast, threadMinDistance, threadNearestNode, threadIterationCount) \
     shared(connected, minDistance, minimumDistances, nearestNode, numOfThreads, distanceMatrix)
@@ -268,7 +276,10 @@ vector<float> dijkstraAlgorithm(vector<vector<float>> &distanceMatrix,
     }
     //  Once all the nodes have been connected, we can exit.
   }
-
+  double end = omp_get_wtime();
+  double timeTaken = end - start;
+  cout << "Total time taken for parallel Dijkstra computation = " << timeTaken;
+  cout << "\n";
   return minimumDistances;
 }
 
@@ -330,9 +341,7 @@ vector<vector<float>> initializeData(vector<string> &cities)
   string state;
   while (!inStatesFile.eof())
   {
-    // inStatesFile >> state;
     getline(inStatesFile, state, '\n');
-    // cout << state << "\n";
     if (!inStatesFile.good())
     {
       break;
@@ -340,19 +349,31 @@ vector<vector<float>> initializeData(vector<string> &cities)
     states.push_back(state);
   }
   inStatesFile.close();
-  cout << "Available States: \n";
-  for (int i = 0; i < states.size(); i++)
+  cout << "List of Available States for Travel: \n";
+  for (int i = 1; i < states.size(); i++)
   {
-    cout << "\t" << i + 1 << ". " << states[i] << "\n";
+    cout << "\t" << i << ". " << states[i] << "\n";
   }
-  cout << "Choose a state where you are planning to travel \n";
-  cout << "Choose '1' if you plan to travel across India else the "
-       << "corresponding row number: ";
+  cout << "We also have Pan India Travel option\n";
+  cout << "Choose a state where you are planning to travel with ";
+  cout << "the corresponding row number or Choose '0' if you plan to travel "
+       << "across India: ";
   int stateNum;
   cin >> stateNum;
-  --stateNum;
-  cout << "You choose to go to: " << states[stateNum] << "\n";
-
+  if (stateNum == 0)
+  {
+    cout << "You choose to travel Pan India\n";
+  }
+  else if (stateNum < states.size())
+  {
+    cout << "You choose to go to: " << states[stateNum] << "\n";
+  }
+  else
+  {
+    cerr << "Option out of bound\n";
+    exit(0);
+  }
+  cout << "----- Welcome to " << states[stateNum] << " Tourism -----\n";
   ifstream inFile;
 
   inFile.open(".\\data\\" + states[stateNum] + "\\" +
