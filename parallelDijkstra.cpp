@@ -192,8 +192,11 @@ vector<float> dijkstraAlgorithm(vector<vector<float>> &distanceMatrix,
     minimumDistances[i] = distanceMatrix[0][i];
   }
 
-  double start = omp_get_wtime();
+  // double start = omp_get_wtime();
   // auto start = high_resolution_clock::now();
+  std::chrono::time_point<std::chrono::system_clock> start, end;
+
+  start = std::chrono::system_clock::now();
 
 #pragma omp parallel private(threadFirst, threadID, threadLast, threadMinDistance, threadNearestNode, threadIterationCount) \
     shared(connected, minDistance, minimumDistances, nearestNode, numOfThreads, distanceMatrix)
@@ -279,10 +282,18 @@ vector<float> dijkstraAlgorithm(vector<vector<float>> &distanceMatrix,
     }
     //  Once all the nodes have been connected, we can exit.
   }
-  double end = omp_get_wtime();
-  double timeTaken = end - start;
-  cout << "Total time taken for parallel Dijkstra computation = "
-       << timeTaken * 1000 << "microseconds \n";
+  end = std::chrono::system_clock::now();
+
+  std::chrono::duration<double> elapsed_seconds = end - start;
+  std::time_t end_time = std::chrono::system_clock::to_time_t(end);
+
+  std::cout << "finished computation at " << std::ctime(&end_time)
+            << "elapsed time: " << elapsed_seconds.count() << "s\n";
+
+  // double end = omp_get_wtime();
+  // double timeTaken = end - start;
+  // cout << "Total time taken for parallel Dijkstra computation = "
+  //      << timeTaken * 1000 << "microseconds \n";
   // auto stop = high_resolution_clock::now();
 
   // auto timeTaken = duration_cast<microseconds>(stop - start).count();
